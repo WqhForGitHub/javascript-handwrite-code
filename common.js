@@ -395,15 +395,15 @@ function debounce(func, delay) {
   let timeoutId;
 
   return function (...args) {
-      // 清除之前的定时器
-      if (timeoutId) {
-          clearTimeout(timeoutId);
-      }
+    // 清除之前的定时器
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
 
-      // 设置一个新的定时器
-      timeoutId = setTimeout(() => {
-          func.apply(this, args);
-      }, delay);
+    // 设置一个新的定时器
+    timeoutId = setTimeout(() => {
+      func.apply(this, args);
+    }, delay);
   };
 }
 
@@ -412,12 +412,12 @@ function throttle(func, delay) {
   let lastExecutionTime = 0;
 
   return function (...args) {
-      const now = Date.now();
+    const now = Date.now();
 
-      if (now - lastExecutionTime >= delay) {
-          lastExecutionTime = now;
-          func.apply(this, args);
-      }
+    if (now - lastExecutionTime >= delay) {
+      lastExecutionTime = now;
+      func.apply(this, args);
+    }
   };
 }
 
@@ -427,26 +427,26 @@ let eventEmitter = {
 
   // 订阅事件
   on: function (event, listener) {
-      if (!this.events[event]) {
-          this.events[event] = [];
-      }
-      this.events[event].push(listener);
+    if (!this.events[event]) {
+      this.events[event] = [];
+    }
+    this.events[event].push(listener);
   },
 
   // 发布事件
   emit: function (event, ...args) {
-      if (!this.events[event]) {
-          return;
-      }
-      this.events[event].forEach((listener) => listener(...args));
+    if (!this.events[event]) {
+      return;
+    }
+    this.events[event].forEach((listener) => listener(...args));
   },
 
   // 取消订阅事件
   off: function (event, listener) {
-      if (!this.events[event]) {
-          return;
-      }
-      this.events[event] = this.events[event].filter((l) => l !== listener);
+    if (!this.events[event]) {
+      return;
+    }
+    this.events[event] = this.events[event].filter((l) => l !== listener);
   },
 };
 
@@ -455,24 +455,32 @@ function sum(...args) {
   return args.reduce((acc, curr) => acc + curr, 0);
 }
 
+// 对象数组转换为树形结构
+function arrayToTree(items) {
+  const map = new Map();
+  const result = [];
 
+  // 创建一个 map，方便后续查找节点
+  items.forEach(item => {
+    map.set(item.id, { ...item, children: [] });
+  });
 
+  items.forEach(item => {
+    const node = map.get(item.id);
+    if (item.parentId === null) {
+      // 如果是根节点，直接添加到 result
+      result.push(node);
+    } else {
+      // 如果有父节点，找到父节点并将当前节点加入其 children 数组
+      const parentNode = map.get(item.parentId);
+      if (parentNode) {
+        parentNode.children.push(node);
+      }
+    }
+  });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  return result;
+}
 
 
 
@@ -538,3 +546,173 @@ Promise.myAll = function (promises) {
     });
   });
 };
+
+
+// JSON.stringify
+function stringifyJSON(value) {
+  if (typeof value === 'string') {
+    return `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+  }
+
+  if (typeof value === 'number') {
+    return isFinite(value) ? value.toString() : 'null';
+  }
+
+  if (typeof value === 'boolean' || value === null) {
+    return value.toString();
+  }
+
+  if (Array.isArray(value)) {
+    const arrayStr = value.map((item) => stringifyJSON(item)).join(',');
+    return `[${arrayStr}]`;
+  }
+
+  if (typeof value === 'object') {
+    if (value === null) return 'null';
+
+    const keys = Object.keys(value);
+    const objectStr = keys
+      .map((key) => {
+        const val = stringifyJSON(value[key]);
+        return `"${key}":${val}`;
+      })
+      .join(',');
+
+    return `{${objectStr}}`;
+  }
+
+  return 'null'; // For functions and undefined
+}
+
+
+// JSON.parse
+function parseJSON(json) {
+  let index = 0;
+
+  function parseValue() {
+    skipWhitespace();
+    const char = json[index];
+
+    if (char === '{') return parseObject();
+    if (char === '[') return parseArray();
+    if (char === '"') return parseString();
+    if (char === '-' || (char >= '0' && char <= '9')) return parseNumber();
+    if (json.startsWith('true', index)) return parseTrue();
+    if (json.startsWith('false', index)) return parseFalse();
+    if (json.startsWith('null', index)) return parseNull();
+
+    throw new Error('Unexpected token');
+  }
+
+  function skipWhitespace() {
+    while (index < json.length && /\s/.test(json[index])) {
+      index++;
+    }
+  }
+
+  function parseObject() {
+    const obj = {};
+    index++; // Skip '{'
+    skipWhitespace();
+
+    if (json[index] === '}') {
+      index++;
+      return obj;
+    }
+
+    while (true) {
+      skipWhitespace();
+      const key = parseString();
+      skipWhitespace();
+      if (json[index] !== ':') throw new Error('Expected colon');
+      index++;
+      const value = parseValue();
+      obj[key] = value;
+      skipWhitespace();
+      if (json[index] === '}') {
+        index++;
+        break;
+      }
+      if (json[index] !== ',') throw new Error('Expected comma');
+      index++;
+    }
+    return obj;
+  }
+
+  function parseArray() {
+    const arr = [];
+    index++; // Skip '['
+    skipWhitespace();
+
+    if (json[index] === ']') {
+      index++;
+      return arr;
+    }
+
+    while (true) {
+      const value = parseValue();
+      arr.push(value);
+      skipWhitespace();
+      if (json[index] === ']') {
+        index++;
+        break;
+      }
+      if (json[index] !== ',') throw new Error('Expected comma');
+      index++;
+    }
+    return arr;
+  }
+
+  function parseString() {
+    index++; // Skip '"'
+    let str = '';
+    while (index < json.length && json[index] !== '"') {
+      if (json[index] === '\\') {
+        index++;
+        const esc = json[index];
+        if (esc === '"' || esc === '\\') {
+          str += esc;
+        } else if (esc === 'u') {
+          const code = json.substring(index + 1, index + 5);
+          str += String.fromCharCode(parseInt(code, 16));
+          index += 4;
+        } else {
+          throw new Error('Invalid escape character');
+        }
+      } else {
+        str += json[index];
+      }
+      index++;
+    }
+    index++; // Skip '"'
+    return str;
+  }
+
+  function parseNumber() {
+    let start = index;
+    while (index < json.length && /[0-9.-]/.test(json[index])) {
+      index++;
+    }
+    const num = json.substring(start, index);
+    return parseFloat(num);
+  }
+
+  function parseTrue() {
+    index += 4; // Skip 'true'
+    return true;
+  }
+
+  function parseFalse() {
+    index += 5; // Skip 'false'
+    return false;
+  }
+
+  function parseNull() {
+    index += 4; // Skip 'null'
+    return null;
+  }
+
+  return parseValue();
+}
+
+
