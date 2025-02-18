@@ -1,5 +1,154 @@
 
 
+
+
+
+
+# call 方法
+
+```javascript
+Function.prototype.myCall = function (thisArg, ...args) {
+    if (typeof this !== "function") {
+        throw new TypeError(this + " is not a function");
+    }
+    
+    thisArg = thisArg || globalThis;
+    
+    const fnSymbol = Symbol();
+    
+    thisArg[fnSymbol] = this;
+    
+    const result = thisArg[fnSymbol](...args);
+    
+    delete thisArg[fnSymbol];
+    
+    return result;
+}
+```
+
+
+
+
+
+# apply 方法
+
+```javascript
+Function.prototype.myApply = function (thisArg, argsArray) {
+    if (typeof this !== "function") {
+        throw new TypeError(this + " is not a function");
+    }
+    
+    thisArg = thisArg || globalThis;
+    
+    const fnSymbol = Symbol();
+    
+    thisArg[fnSymbol] = Symbol();
+    
+    const result = thisArg[fnSymbol](...argsArray);
+    
+    delete thisArg[fnSymbol];
+    
+    return result;
+}
+```
+
+
+
+
+
+# bind 方法
+
+```javascript
+Function.prototype.myBind = function (context, ...args) {
+    const fn = this;
+    
+    return function (...newArgs) {
+        return fn.apply(context, args.concat(newArgs));
+    }
+}
+```
+
+
+
+
+
+
+
+
+
+# typeof 
+
+```javascript
+function myTypeof(obj) {
+    return Object.prototype.toString.call(obj).slice(8, -1).toLowerCase();
+}
+```
+
+
+
+
+
+
+
+
+
+# 模拟 instanceof 
+
+```javascript
+function myInstanceof(left, right) {
+    const prototype = right.prototype;
+    let proto = Object.getPrototypeOf(left);
+    
+    while(proto !== null) {
+        if (proto === prototype) {
+            return true;
+        }
+        
+        proto = Object.getPrototypeOf(proto);
+    }
+    
+    return false;
+}
+```
+
+
+
+
+
+
+
+# 函数所有参数求和
+
+```javascript
+function sum(...args) {
+    return args.reduce((acc, curr) => acc + curr, 0);
+}
+```
+
+
+
+
+
+
+
+# 模拟 new 操作
+
+```javascript
+function myNew(constructor, ...args) {
+    const obj = {};
+    
+    Object.setPrototypeOf(obj, constructor.prototype);
+    
+    const result = constructor.apply(obj, args);
+    
+    return result !== null && (typeof result === "object" || typeof result === "function") ? result : obj;
+}
+```
+
+
+
+
+
 # setTimeout 模拟 setInterval
 
 ```javascript
