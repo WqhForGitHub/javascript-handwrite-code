@@ -1,5 +1,101 @@
 ```javascript
 class MyPromise {
+  constructor(executor) {
+    this.state = 'pending';
+    this.value = undefined;
+    this.reason = undefined;
+    this.onFulfilledCallbacks = [];
+    this.onRejectedCallbacks = [];
+
+    const resolve = (value) => {
+      if (this.state === 'pending') {
+        this.state = 'fulfilled';
+        this.value = value;
+        this.onFulfilledCallbacks.forEach(fn => fn(value));
+      }
+    };
+
+    const reject = (reason) => {
+      if (this.state === 'pending') {
+        this.state = 'rejected';
+        this.reason = reason;
+        this.onRejectedCallbacks.forEach(fn => fn(reason));
+      }
+    };
+
+    try {
+      executor(resolve, reject);
+    } catch (error) {
+      reject(error);
+    }
+  }
+
+  then(onFulfilled, onRejected) {
+    return new MyPromise((resolve, reject) => {
+      if (this.state === 'fulfilled') {
+        try {
+          const result = onFulfilled(this.value);
+          resolve(result);
+        } catch (error) {
+          reject(error);
+        }
+      }
+
+      if (this.state === 'rejected') {
+        try {
+          const result = onRejected(this.reason);
+          resolve(result);
+        } catch (error) {
+          reject(error);
+        }
+      }
+
+      if (this.state === 'pending') {
+        this.onFulfilledCallbacks.push(() => {
+          try {
+            const result = onFulfilled(this.value);
+            resolve(result);
+          } catch (error) {
+            reject(error);
+          }
+        });
+
+        this.onRejectedCallbacks.push(() => {
+          try {
+            const result = onRejected(this.reason);
+            resolve(result);
+          } catch (error) {
+            reject(error);
+          }
+        });
+      }
+    });
+  }
+}
+
+// 使用示例
+const promise = new MyPromise((resolve, reject) => {
+  setTimeout(() => {
+    resolve('成功');
+  }, 1000);
+});
+
+promise.then(
+  (value) => {
+    console.log('fulfilled:', value);
+  },
+  (reason) => {
+    console.log('rejected:', reason);
+  }
+);
+```
+
+
+
+
+
+```javascript
+class MyPromise {
     constructor(executor) {
         this.state = "pending"; // 初始状态
         this.value = undefined; // 成功值
