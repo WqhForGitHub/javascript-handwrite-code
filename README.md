@@ -336,6 +336,24 @@ promise.then(
 );
 ```
 
+**`使用示例`**
+```javascript
+const promise = new MyPromise((resolve, reject) => {
+    setTimeout(() => {
+        resolve("success");
+    }, 1000);
+});
+
+promise.then((value) => {
+    console.log(value); // 输出 success
+    return "next success";
+}).then((value) => {
+    console.log(value); // 输出 "next success"
+}).catch((error) => {
+    console.error(error);
+});
+```
+
 
 
 
