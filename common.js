@@ -550,10 +550,13 @@ Promise.myAll = function (promises) {
 
 // JSON.stringify
 function stringifyJSON(value) {
+  
+  // 对字符串中的反斜杠和双引号进行了转义，确保生成的 JSON 字符串符合规范
   if (typeof value === 'string') {
     return `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
   }
 
+  // 使用 isFinite 函数检查数字是否为有限值，如果不是有限值，则返回 null
   if (typeof value === 'number') {
     return isFinite(value) ? value.toString() : 'null';
   }
