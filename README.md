@@ -246,3 +246,101 @@ function deepCopy(obj, hash = new WeakMap()) {
 
 
 
+
+
+# promise
+
+
+
+# 实现 Promise.all
+
+# 实现 Promise.finally
+
+# 实现 promise.allSettled
+
+# 实现 promise.race
+
+# promise.any
+
+# promise.resolve
+
+# promise.reject
+
+# 数组去重
+
+# 数组扁平化
+
+# forEach
+
+# reduce
+
+# map
+
+# filter
+
+# every
+
+# some
+
+# find、findIndex
+
+# indexOf
+
+# sort
+
+# 防抖节流
+
+# 深拷贝
+
+# new 
+
+# 继承
+
+# object.create
+
+# call
+
+# bind
+
+# apply
+
+# 实现柯里化
+
+# ajax
+
+# jsonp
+
+# set
+
+# map
+
+# es6 的 class
+
+# instanceof
+
+# 实现千分位分隔符
+
+# 实现数据类型判断函数
+
+# 实现数组转数
+
+# 实现 sleep 函数
+
+# 实现发布订阅模式
+
+# 把一个JSON对象的key从下划线形式（Pascal）转换到小驼峰形式（Camel）
+
+
+
+# 解析 URL 参数为对象
+
+
+
+
+
+
+
+
+
+
+
